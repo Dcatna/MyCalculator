@@ -1,12 +1,10 @@
 package my.packlol.mycalculator
 
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.View.OnClickListener
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import my.packlol.mycalculator.databinding.ActivityMainBinding
@@ -17,7 +15,6 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainActivityViewModel>()
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -39,16 +36,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnMultiply.setOnClickListener {
-            viewModel.onOpertor("*")
+            viewModel.onOperator("*")
         }
         binding.btnDivide.setOnClickListener {
-            viewModel.onOpertor("/")
+            viewModel.onOperator("/")
         }
         binding.btnSubtract.setOnClickListener {
-            viewModel.onOpertor("-")
+            viewModel.onOperator("-")
         }
         binding.btnAdd.setOnClickListener {
-            viewModel.onOpertor("+")
+            viewModel.onOperator("+")
         }
 
         binding.btnEqual.setOnClickListener {
@@ -69,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnSeven.setOnClickListener(onDigitListener)
         binding.btnEight.setOnClickListener(onDigitListener)
         binding.btnNine.setOnClickListener(onDigitListener)
+        binding.btnZero.setOnClickListener(onDigitListener)
     }
 
     inner class OnDigitListener : OnClickListener {

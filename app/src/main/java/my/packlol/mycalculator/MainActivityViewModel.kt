@@ -36,7 +36,7 @@ class MainActivityViewModel: ViewModel() {
             }
         }
     }
-    fun onOpertor(operator: String) {
+    fun onOperator(operator: String) {
         viewModelScope.launch {
             if(lastNumeric && !isOperatorAdded(mutableText.value)){
                 mutableText.emit(mutableText.value + operator)
@@ -59,49 +59,33 @@ class MainActivityViewModel: ViewModel() {
     fun onEqual() {
         viewModelScope.launch {
             if (lastNumeric) {
+
                 var tvValue = mutableText.value
                 var prefix = ""
-                try {
-                    if (tvValue.startsWith("-")) {
-                        prefix = "-"
-                        tvValue = tvValue.substring(1)
-                    }
-                    if (tvValue.contains("-")) {
 
-                        var (one, two) = tvValue.split("-")
-
-                        if (prefix.isNotEmpty()) {
-                            one = prefix + one
-                        }
-                        mutableText.emit(removeDotZero((one.toDouble() - two.toDouble()).toString()))
-                    } else if (tvValue.contains("+")) {
-
-                        var (one, two) = tvValue.split("+")
-
-                        if (prefix.isNotEmpty()) {
-                            one = prefix + one
-                        }
-                        mutableText.emit(removeDotZero((one.toDouble() + two.toDouble()).toString()))
-                    } else if (tvValue.contains("*")) {
-
-                        var (one, two)  = tvValue.split("*")
-
-                        if (prefix.isNotEmpty()) {
-                            one = prefix + one
-                        }
-                        mutableText.emit(removeDotZero((one.toDouble() * two.toDouble()).toString()))
-                    } else {
-                        var (one, two) = tvValue.split("/")
-
-                        if (prefix.isNotEmpty()) {
-                            one = prefix + one
-                        }
-                        mutableText.emit(removeDotZero((one.toDouble() / two.toDouble()).toString()))
-                    }
-
-                } catch (e: ArithmeticException) {
-                    e.printStackTrace()
+                if (tvValue.startsWith("-")) {
+                    prefix = "-"
+                    tvValue = tvValue.substring(1)
                 }
+
+                val result: Double? = tvValue
+                    .find { it in listOf('/', '*', '+', '-') }
+                    ?.let { operator ->
+
+                    val (one, two) = tvValue.split(operator)
+
+                    val left = (prefix + one).toDoubleOrNull() ?: return@let null
+                    val right = two.toDoubleOrNull() ?: return@let null
+
+                    when (operator) {
+                        '+' -> left + right
+                        '-' -> left - right
+                        '*' -> left * right
+                        '/' -> left / right
+                        else -> null
+                    }
+                }
+                result?.let { mutableText.emit(removeDotZero(it.toString())) }
             }
         }
     }
