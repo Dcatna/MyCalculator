@@ -27,9 +27,22 @@ class MainActivityViewModel: ViewModel() {
             mutableText.emit("")
         }
     }
+
+    private fun String.decimalsAfterOperator(operatorIdx: Int) = this
+        .substring(operatorIdx, this.lastIndex).count { it == '.' }
+
     fun onDecimal() {
         viewModelScope.launch {
-            if(lastNumeric && !lastDot && mutableText.value.count { it == '.' } == 0) {
+            val equation = mutableText.value
+            if(lastNumeric && !lastDot) {
+                val operatorIdx = equation.indexOfFirst { it in listOf('/', '*', '+', '-') }
+
+                if (operatorIdx == -1 && equation.count { it == '.' } > 0) {
+                    return@launch
+                } else if(operatorIdx != -1 && equation.decimalsAfterOperator(operatorIdx) > 0) {
+                    return@launch
+                }
+
                 mutableText.emit(mutableText.value + ".")
                 lastNumeric = false
                 lastDot = true
