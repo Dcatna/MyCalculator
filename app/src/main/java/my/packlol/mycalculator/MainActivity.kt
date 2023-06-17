@@ -1,136 +1,94 @@
 package my.packlol.mycalculator
 
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
-import java.lang.ArithmeticException
+import android.view.View.OnClickListener
+import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import my.packlol.mycalculator.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private var tvInput: TextView? = null
-    var lastNumeric : Boolean = false
-    var lastDot : Boolean = false
+    private lateinit var binding: ActivityMainBinding
 
+    private val viewModel by viewModels<MainActivityViewModel>()
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        tvInput = findViewById<TextView>(R.id.tvInput)
-
-    }
-
-    fun onDigit(view: View){
-
-        tvInput?.append((view as Button).text)
-        lastNumeric = true
-        lastDot = false
-
-    }
-
-    fun onClear(view: View) {
-        tvInput?.text = ""
-    }
-    fun onDecimal(view: View) {
-        if(lastNumeric && !lastDot) {
-            tvInput?.append(".")
-            lastNumeric = false
-            lastDot = true
-        }
-    }
-
-    fun onOperator(view: View) {
-        tvInput?.text?.let{
-
-            if(lastNumeric && !isOperatorAdded(it.toString())){
-                tvInput?.append((view as Button).text)
-                lastNumeric = false
-                lastDot = false
+        lifecycleScope.launch {
+            viewModel.text.collect { equation ->
+                binding.tvInput.text = equation
             }
         }
-    }
 
-    fun onEqual(view: View) {
-        if(lastNumeric) {
-            var tvValue = tvInput?.text.toString()
-            var prefix = ""
-            try{
-                if(tvValue.startsWith("-")){
-                    prefix = "-"
-                    tvValue = tvValue.substring(1)
-                }
-                if(tvValue.contains("-")) {
+        setDigitBtnOnClickListeners(OnDigitListener())
 
-                    val splitValue = tvValue.split("-")
-                    var one = splitValue[0]
-                    var two = splitValue[1]
+        binding.btnClear.setOnClickListener {
+            viewModel.onClear()
+        }
+        binding.btnDecimal.setOnClickListener {
+            viewModel.onDecimal()
+        }
 
-                    if(prefix.isNotEmpty()){
-                        one = prefix + one
-                    }
-                    tvInput?.text = removeDotZero((one.toDouble() - two.toDouble()).toString())
-                }
+        binding.btnMultiply.setOnClickListener {
+            viewModel.onOpertor("*")
+        }
+        binding.btnDivide.setOnClickListener {
+            viewModel.onOpertor("/")
+        }
+        binding.btnSubtract.setOnClickListener {
+            viewModel.onOpertor("-")
+        }
+        binding.btnAdd.setOnClickListener {
+            viewModel.onOpertor("+")
+        }
 
-                else if(tvValue.contains("+")) {
-
-                    val splitValue = tvValue.split("+")
-                    var one = splitValue[0]
-                    var two = splitValue[1]
-
-                    if(prefix.isNotEmpty()){
-                        one = prefix + one
-                    }
-                    tvInput?.text = removeDotZero((one.toDouble() + two.toDouble()).toString())
-                }
-                else if(tvValue.contains("*")) {
-
-                    val splitValue = tvValue.split("*")
-                    var one = splitValue[0]
-                    var two = splitValue[1]
-
-                    if(prefix.isNotEmpty()){
-                        one = prefix + one
-                    }
-                    tvInput?.text = removeDotZero((one.toDouble() * two.toDouble()).toString())
-                }
-                else{
-
-                        val splitValue = tvValue.split("/")
-                        var one = splitValue[0]
-                        var two = splitValue[1]
-
-                        if(prefix.isNotEmpty()){
-                            one = prefix + one
-                        }
-                        tvInput?.text = removeDotZero((one.toDouble() / two.toDouble()).toString())
-                    }
-
-            }catch(e: ArithmeticException){
-                e.printStackTrace()
-            }
-
+        binding.btnEqual.setOnClickListener {
+            viewModel.onEqual()
         }
     }
 
-    private fun removeDotZero(result : String) : String{
-        var value = result
-        if(result.contains(".0")){
-            value = result.substring(0, result.length-2)
-        }
-        return value
+    private fun setDigitBtnOnClickListeners(
+        onDigitListener: OnDigitListener
+    ) {
+
+        binding.btnOne.setOnClickListener(onDigitListener)
+        binding.btnTwo.setOnClickListener(onDigitListener)
+        binding.btnThree.setOnClickListener(onDigitListener)
+        binding.btnFour.setOnClickListener(onDigitListener)
+        binding.btnFive.setOnClickListener(onDigitListener)
+        binding.btnSix.setOnClickListener(onDigitListener)
+        binding.btnSeven.setOnClickListener(onDigitListener)
+        binding.btnEight.setOnClickListener(onDigitListener)
+        binding.btnNine.setOnClickListener(onDigitListener)
     }
 
-    private fun isOperatorAdded(value : String) : Boolean{
+    inner class OnDigitListener : OnClickListener {
 
-        return if(value.startsWith("-")){
-            false
-        }else{
-            value.contains("/")
-                    || value.contains("*")
-                    || value.contains("+")
-                    || value.contains("-")
+        override fun onClick(v: View?) {
+            viewModel.onDigit(
+                when (v) {
+                    binding.btnOne -> "1"
+                    binding.btnTwo -> "2"
+                    binding.btnThree -> "3"
+                    binding.btnFour -> "4"
+                    binding.btnFive -> "5"
+                    binding.btnSix -> "6"
+                    binding.btnSeven -> "7"
+                    binding.btnEight -> "8"
+                    binding.btnNine -> "9"
+                    binding.btnZero -> "0"
+                    else -> return
+                }
+            )
         }
     }
 }
