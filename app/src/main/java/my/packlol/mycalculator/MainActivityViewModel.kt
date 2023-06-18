@@ -1,30 +1,30 @@
 package my.packlol.mycalculator
 
-import androidx.lifecycle.ViewModel
+import androidx.databinding.Bindable
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.skydoves.bindables.BindingViewModel
+import com.skydoves.bindables.bindingProperty
 import kotlinx.coroutines.launch
 
-class MainActivityViewModel: ViewModel() {
+class MainActivityViewModel: BindingViewModel() {
 
     private var lastNumeric = false
     private var lastDot = false
 
-
-    private val mutableText = MutableStateFlow("")
-    val text = mutableText.asStateFlow()
+    @get:Bindable
+    var editText: String by bindingProperty("")
+        private set
 
     fun onDigit(value: String) {
         viewModelScope.launch {
-            mutableText.emit(mutableText.value + value)
+            editText += value
             lastNumeric = true
             lastDot = false
         }
     }
     fun onClear() {
         viewModelScope.launch {
-            mutableText.emit("")
+            editText = ""
         }
     }
 
@@ -33,7 +33,7 @@ class MainActivityViewModel: ViewModel() {
 
     fun onDecimal() {
         viewModelScope.launch {
-            val equation = mutableText.value
+            val equation = editText
             if(lastNumeric && !lastDot) {
                 val operatorIdx = equation.indexOfFirst { it in listOf('/', '*', '+', '-') }
 
@@ -43,7 +43,7 @@ class MainActivityViewModel: ViewModel() {
                     return@launch
                 }
 
-                mutableText.emit(mutableText.value + ".")
+                editText += "."
                 lastNumeric = false
                 lastDot = true
             }
@@ -51,8 +51,8 @@ class MainActivityViewModel: ViewModel() {
     }
     fun onOperator(operator: String) {
         viewModelScope.launch {
-            if(lastNumeric && !isOperatorAdded(mutableText.value)){
-                mutableText.emit(mutableText.value + operator)
+            if(lastNumeric && !isOperatorAdded(editText)){
+                editText += operator
                 lastNumeric = false
                 lastDot = false
             }
@@ -73,7 +73,7 @@ class MainActivityViewModel: ViewModel() {
         viewModelScope.launch {
             if (lastNumeric) {
 
-                var tvValue = mutableText.value
+                var tvValue = editText
                 var prefix = ""
 
                 if (tvValue.startsWith("-")) {
@@ -98,7 +98,7 @@ class MainActivityViewModel: ViewModel() {
                         else -> null
                     }
                 }
-                result?.let { mutableText.emit(removeDotZero(it.toString())) }
+                result?.let { editText = removeDotZero(it.toString()) }
             }
         }
     }

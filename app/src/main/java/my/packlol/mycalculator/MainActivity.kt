@@ -1,40 +1,44 @@
 package my.packlol.mycalculator
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.view.View.OnClickListener
 import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
+import com.skydoves.bindables.BindingActivity
 import my.packlol.mycalculator.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
+class MainActivity:  BindingActivity<ActivityMainBinding>(R.layout.activity_main) {
 
-    private val viewModel by viewModels<MainActivityViewModel>()
+    private val viewModel: MainActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        lifecycleScope.launch {
-            viewModel.text.collect { equation ->
-                binding.tvInput.text = equation
-            }
-        }
+        binding.viewModel = viewModel
 
+        setOnOperatorClickListeners()
         setDigitBtnOnClickListeners(OnDigitListener())
+        setActionButtonListeners()
 
+        binding {
+            lifecycleOwner = this@MainActivity
+            viewModel = viewModel
+        }
+    }
+
+    private fun setActionButtonListeners() {
         binding.btnClear.setOnClickListener {
             viewModel.onClear()
         }
         binding.btnDecimal.setOnClickListener {
             viewModel.onDecimal()
         }
+        binding.btnEqual.setOnClickListener {
+            viewModel.onEqual()
+        }
+    }
 
+    private fun setOnOperatorClickListeners() {
         binding.btnMultiply.setOnClickListener {
             viewModel.onOperator("*")
         }
@@ -48,15 +52,11 @@ class MainActivity : AppCompatActivity() {
             viewModel.onOperator("+")
         }
 
-        binding.btnEqual.setOnClickListener {
-            viewModel.onEqual()
-        }
     }
 
     private fun setDigitBtnOnClickListeners(
         onDigitListener: OnDigitListener
     ) {
-
         binding.btnOne.setOnClickListener(onDigitListener)
         binding.btnTwo.setOnClickListener(onDigitListener)
         binding.btnThree.setOnClickListener(onDigitListener)
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnZero.setOnClickListener(onDigitListener)
     }
 
-    inner class OnDigitListener : OnClickListener {
+    inner class OnDigitListener : View.OnClickListener {
 
         override fun onClick(v: View?) {
             viewModel.onDigit(

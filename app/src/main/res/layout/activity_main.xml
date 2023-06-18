@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <data>
+        <variable
+            name="viewModel"
+            type="my.packlol.mycalculator.MainActivityViewModel" />
+    </data>
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
     android:orientation="vertical"
-    android:id="@+id/linearLayoutParent"
+    android:id="@+id/main_activity_root"
     >
+
 
     <TextView
         android:id="@+id/tvInput"
@@ -17,7 +25,7 @@
         android:padding="10dp"
         android:textSize="48sp"
         android:gravity="end|bottom"
-        android:text=""
+        android:text="@{viewModel.editText}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -37,7 +45,6 @@
             android:layout_weight="1"
             android:layout_margin="2dp"
             android:text="7"
-
             />
         <Button
             android:id="@+id/btnEight"
@@ -237,3 +244,4 @@
     </LinearLayout>
 
 </LinearLayout>
+</layout>
